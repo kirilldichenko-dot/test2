@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1"
     />
-    <title>Telegram Tools Mini App</title>
+    <title>Utility Tools</title>
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="style.css" />
@@ -14,8 +14,8 @@
   <body>
     <div id="app">
       <header class="app-header">
-        <h1 class="app-title">Assistant Tools</h1>
-        <p class="app-subtitle">Quick utilities inside Telegram</p>
+        <h1 class="app-title">Utility Tools</h1>
+        <p class="app-subtitle">Password + Minesweeper</p>
       </header>
 
       <main class="app-main">
@@ -23,44 +23,35 @@
           <button id="btn-password" class="primary-btn">
             🔐 Generate Password
           </button>
-
-          <button id="btn-roll" class="primary-btn">
-            🎲 Roll Dice
-          </button>
-
-          <button id="btn-flip" class="primary-btn">
-            🪙 Flip Coin
-          </button>
-
-          <button id="btn-calc" class="primary-btn">
-            🧮 Calculator
-          </button>
-
-          <button id="btn-time" class="primary-btn">
-            🕒 Current Time
-          </button>
         </div>
 
         <section class="panel">
           <h2 class="panel-title">Result</h2>
           <div id="result" class="result-box">
-            Tap a button to see the result here.
+            Tap “Generate Password” to see the result here.
           </div>
         </section>
 
-        <section class="panel" id="calc-panel">
-          <h2 class="panel-title">Calculator</h2>
-          <div class="calc-row">
-            <input
-              id="calc-input"
-              class="calc-input"
-              type="text"
-              placeholder="2 + 2 * 10"
-              inputmode="decimal"
-            />
-            <button id="btn-calc-eval" class="secondary-btn">=</button>
+        <section class="panel" id="minesweeper-panel">
+          <div class="panel-row">
+            <h2 class="panel-title panel-title--no-margin">Minesweeper</h2>
+            <div class="panel-actions">
+              <button id="btn-new-game" class="secondary-btn">New</button>
+              <button id="btn-flag-mode" class="secondary-btn" aria-pressed="false">
+                🚩 Off
+              </button>
+            </div>
           </div>
-          <p class="calc-hint">Supports basic operations: + − × ÷ and brackets.</p>
+
+          <div class="ms-meta">
+            <span id="ms-status" class="ms-status">Good luck!</span>
+            <span id="ms-mines" class="ms-mines">💣 10</span>
+          </div>
+
+          <div id="ms-grid" class="ms-grid" role="grid" aria-label="Minesweeper grid"></div>
+          <p class="calc-hint">
+            Tip: Tap a cell to open. Turn on 🚩 mode to place flags.
+          </p>
         </section>
       </main>
     </div>

@@ -1,0 +1,20 @@
+{
+  "games": {
+    "b7205ee4": {
+      "board_state": null,
+      "created_at": "2026-03-13T08:54:20.815022+00:00",
+      "current_turn": 1,
+      "game_id": "b7205ee4",
+      "game_type": "chess",
+      "host_id": 1,
+      "mode": "pvp",
+      "opponent_id": 2,
+      "players": [
+        1,
+        2
+      ],
+      "status": "active",
+      "updated_at": "2026-03-13T08:54:20.815853+00:00"
+    }
+  }
+}

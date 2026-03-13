@@ -1,0 +1,14 @@
+{
+  "users": {
+    "1": {
+      "first_name": "",
+      "games_played": 1,
+      "last_name": "",
+      "losses": 0,
+      "total_score": 3,
+      "user_id": 1,
+      "username": "test",
+      "wins": 1
+    }
+  }
+}
