@@ -1,11 +1,24 @@
 {
   "top": [
     {
+      "checkers_elo": 1000,
+      "chess_elo": 1000,
       "games_played": 1,
+      "rating": 2000,
       "score": 3,
       "user_id": 1,
       "username": "test",
       "wins": 1
+    },
+    {
+      "checkers_elo": 1000,
+      "chess_elo": 1000,
+      "games_played": 1,
+      "rating": 2000,
+      "score": 1,
+      "user_id": 421454371,
+      "username": "klldichenko",
+      "wins": 0
     }
   ]
 }

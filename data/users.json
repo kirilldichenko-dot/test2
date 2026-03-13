@@ -9,6 +9,19 @@
       "user_id": 1,
       "username": "test",
       "wins": 1
+    },
+    "421454371": {
+      "checkers_elo": 1000,
+      "chess_elo": 1000,
+      "created_at": "2026-03-13T09:09:42.220934+00:00",
+      "first_name": "Кирилл",
+      "games_played": 1,
+      "last_name": "",
+      "losses": 1,
+      "total_score": 1,
+      "user_id": 421454371,
+      "username": "klldichenko",
+      "wins": 0
     }
   }
 }

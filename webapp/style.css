@@ -1,13 +1,13 @@
 :root {
-  --bg: #020617;
-  --card-bg: #020617;
+  --bg: #0b1220;
+  --card-bg: rgba(17, 24, 39, 0.85);
   --accent: #38bdf8;
-  --accent-soft: rgba(56, 189, 248, 0.26);
-  --accent-strong: rgba(56, 189, 248, 0.4);
+  --accent-soft: rgba(56, 189, 248, 0.22);
+  --accent-strong: rgba(56, 189, 248, 0.38);
   --text-main: #e5e7eb;
   --text-subtle: #9ca3af;
-  --border-soft: #1f2937;
-  --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.85);
+  --border-soft: rgba(31, 41, 55, 0.95);
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.55);
   --radius-xl: 22px;
   --radius-lg: 16px;
   --radius-md: 12px;
@@ -52,39 +52,55 @@ body {
   border: 1px solid rgba(15, 23, 42, 0.9);
 }
 
-.app-header {
-  text-align: center;
-  padding: 4px 4px 0;
+.hub-header {
+  padding: 6px 6px 0;
 }
 
-.app-title {
-  margin: 0;
-  font-size: 1.45rem;
-  letter-spacing: 0.03em;
-}
-
-.app-subtitle {
-  margin: 4px 0 0;
-  font-size: 0.85rem;
-  color: var(--text-subtle);
-}
-
-.app-main {
+.hub-title-row {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.buttons-grid {
-  display: grid;
-  grid-template-columns: 1fr;
+  align-items: center;
+  justify-content: space-between;
   gap: 10px;
 }
 
-@media (min-width: 400px) {
-  .buttons-grid {
-    grid-template-columns: 1fr 1fr;
-  }
+.hub-title {
+  margin: 0;
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+}
+
+.hub-subtitle {
+  margin: 6px 0 0;
+  font-size: 0.86rem;
+  color: var(--text-subtle);
+}
+
+.hub-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.tab-btn {
+  border-radius: 999px;
+  padding: 10px 10px;
+  background: rgba(2, 6, 23, 0.35);
+  color: var(--text-main);
+  border: 1px solid var(--border-soft);
+  font-size: 0.9rem;
+  transition: transform var(--transition-fast), background var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.tab-btn.is-active {
+  background: rgba(56, 189, 248, 0.16);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.22);
 }
 
 button {
@@ -122,7 +138,9 @@ button {
 
 .secondary-btn {
   padding-inline: 16px;
-  background: #0ea5e9;
+  background: rgba(2, 6, 23, 0.45);
+  border: 1px solid var(--border-soft);
+  box-shadow: none;
 }
 
 .panel {
@@ -152,99 +170,150 @@ button {
   white-space: pre-wrap;
 }
 
-/* Minesweeper */
+/* Hub cards */
 
-.panel-row {
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.is-active {
+  display: block;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+@media (min-width: 420px) {
+  .cards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.game-card {
+  background: rgba(2, 6, 23, 0.5);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+}
+
+.game-card.is-disabled {
+  opacity: 0.65;
+}
+
+.game-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(56, 189, 248, 0.14);
+  display: grid;
+  place-items: center;
+  font-size: 1.3rem;
+}
+
+.game-name {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.game-desc {
+  color: var(--text-subtle);
+  font-size: 0.86rem;
+}
+
+.chip-btn {
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(2, 6, 23, 0.35);
+  border: 1px solid var(--border-soft);
+  color: var(--text-main);
+}
+
+.settings-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
 }
 
-.panel-actions {
+.toggle {
   display: flex;
   align-items: center;
   gap: 8px;
+  color: var(--text-main);
 }
 
-.panel-title--no-margin {
-  margin: 0;
-}
+/* Game screen */
 
-.ms-meta {
+.game-screen {
+  display: none;
   margin-top: 8px;
+}
+
+.game-screen.is-active {
+  display: block;
+}
+
+.game-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  color: var(--text-subtle);
-  font-size: 0.85rem;
+  margin-bottom: 10px;
 }
 
-.ms-grid {
-  --ms-cols: 9;
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: repeat(var(--ms-cols), 1fr);
-  gap: 6px;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-}
-
-.ms-cell {
-  aspect-ratio: 1 / 1;
-  border-radius: 10px;
-  background: rgba(17, 24, 39, 0.9);
-  border: 1px solid rgba(31, 41, 55, 0.95);
-  color: var(--text-main);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.game-title {
   font-weight: 700;
-  font-size: 0.95rem;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
-  transition: transform var(--transition-fast), filter var(--transition-fast),
-    background var(--transition-fast);
 }
 
-.ms-cell:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.06);
+.game-root {
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 12px;
 }
 
-.ms-cell.is-open {
-  background: rgba(2, 6, 23, 0.35);
-  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.12);
+/* Chess / Checkers boards */
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
 }
 
-.ms-cell.is-mine {
-  background: rgba(220, 38, 38, 0.18);
-  border-color: rgba(220, 38, 38, 0.5);
+.sq {
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  user-select: none;
 }
 
-.ms-cell.is-flag {
-  background: rgba(56, 189, 248, 0.12);
-  border-color: rgba(56, 189, 248, 0.35);
+.sq.light {
+  background: rgba(148, 163, 184, 0.12);
+}
+.sq.dark {
+  background: rgba(2, 6, 23, 0.45);
+}
+.sq.is-selected {
+  outline: 2px solid rgba(56, 189, 248, 0.75);
+}
+.sq.is-move {
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35) inset;
 }
 
-.ms-cell.is-open[data-adj="1"] {
-  color: #60a5fa;
-}
-.ms-cell.is-open[data-adj="2"] {
-  color: #34d399;
-}
-.ms-cell.is-open[data-adj="3"] {
-  color: #fb7185;
-}
-.ms-cell.is-open[data-adj="4"] {
-  color: #a78bfa;
-}
-.ms-cell.is-open[data-adj="5"],
-.ms-cell.is-open[data-adj="6"],
-.ms-cell.is-open[data-adj="7"],
-.ms-cell.is-open[data-adj="8"] {
-  color: #fbbf24;
+.game-info {
+  margin-top: 10px;
+  color: var(--text-subtle);
+  font-size: 0.9rem;
+  white-space: pre-wrap;
 }
 
 .calc-hint {

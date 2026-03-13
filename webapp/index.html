@@ -1,62 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1"
     />
-    <title>Utility Tools</title>
+    <title>Игровой хаб</title>
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Chess engine (client-side) -->
+    <script src="https://cdn.jsdelivr.net/npm/chess.js@1.0.0/dist/chess.umd.min.js"></script>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div id="app">
-      <header class="app-header">
-        <h1 class="app-title">Utility Tools</h1>
-        <p class="app-subtitle">Password + Minesweeper</p>
+    <div id="app" class="hub">
+      <header class="hub-header">
+        <div class="hub-title-row">
+          <h1 class="hub-title">Игровой хаб</h1>
+          <button id="btn-close" class="chip-btn" type="button">Закрыть</button>
+        </div>
+        <p class="hub-subtitle">Выберите игру и сыграйте прямо здесь</p>
       </header>
 
-      <main class="app-main">
-        <div class="buttons-grid">
-          <button id="btn-password" class="primary-btn">
-            🔐 Generate Password
-          </button>
-        </div>
+      <nav class="tabs" aria-label="Навигация">
+        <button class="tab-btn is-active" data-tab="games" type="button">🎮 Игры</button>
+        <button class="tab-btn" data-tab="profile" type="button">👤 Профиль</button>
+        <button class="tab-btn" data-tab="rating" type="button">🏆 Рейтинг</button>
+        <button class="tab-btn" data-tab="settings" type="button">⚙ Настройки</button>
+      </nav>
 
-        <section class="panel">
-          <h2 class="panel-title">Result</h2>
-          <div id="result" class="result-box">
-            Tap “Generate Password” to see the result here.
+      <main class="hub-main">
+        <section id="tab-games" class="tab-panel is-active" aria-label="Игры">
+          <div class="cards-grid">
+            <article class="game-card">
+              <div class="game-icon">♟</div>
+              <div class="game-name">Шахматы</div>
+              <div class="game-desc">Ходы, подсветка, игра с ботом</div>
+              <button class="primary-btn" data-open-game="chess" type="button">Играть</button>
+            </article>
+
+            <article class="game-card">
+              <div class="game-icon">⭕</div>
+              <div class="game-name">Шашки</div>
+              <div class="game-desc">Ходы по клеткам, взятия, дамка</div>
+              <button class="primary-btn" data-open-game="checkers" type="button">Играть</button>
+            </article>
+
+            <article class="game-card">
+              <div class="game-icon">🎲</div>
+              <div class="game-name">Дуэль кубиков</div>
+              <div class="game-desc">Бросок 1–6, кто выше — победил</div>
+              <button class="primary-btn" data-open-game="dice" type="button">Играть</button>
+            </article>
+
+            <article class="game-card is-disabled">
+              <div class="game-icon">🃏</div>
+              <div class="game-name">Дурак</div>
+              <div class="game-desc">Скоро</div>
+              <button class="secondary-btn" type="button" disabled>Скоро</button>
+            </article>
           </div>
         </section>
 
-        <section class="panel" id="minesweeper-panel">
-          <div class="panel-row">
-            <h2 class="panel-title panel-title--no-margin">Minesweeper</h2>
-            <div class="panel-actions">
-              <button id="btn-new-game" class="secondary-btn">New</button>
-              <button id="btn-flag-mode" class="secondary-btn" aria-pressed="false">
-                🚩 Off
-              </button>
+        <section id="tab-profile" class="tab-panel" aria-label="Профиль">
+          <div class="panel">
+            <h2 class="panel-title">Профиль</h2>
+            <div id="profile-box" class="result-box">Загрузка…</div>
+          </div>
+        </section>
+
+        <section id="tab-rating" class="tab-panel" aria-label="Рейтинг">
+          <div class="panel">
+            <h2 class="panel-title">Рейтинг</h2>
+            <div id="rating-box" class="result-box">Загрузка…</div>
+          </div>
+        </section>
+
+        <section id="tab-settings" class="tab-panel" aria-label="Настройки">
+          <div class="panel">
+            <h2 class="panel-title">Настройки</h2>
+            <div class="settings-row">
+              <label class="toggle">
+                <input id="music-toggle" type="checkbox" />
+                <span>Музыка</span>
+              </label>
+              <button id="btn-save-settings" class="secondary-btn" type="button">Сохранить</button>
             </div>
           </div>
+        </section>
 
-          <div class="ms-meta">
-            <span id="ms-status" class="ms-status">Good luck!</span>
-            <span id="ms-mines" class="ms-mines">💣 10</span>
+        <section id="game-screen" class="game-screen" aria-label="Экран игры">
+          <div class="game-topbar">
+            <button id="btn-back" class="chip-btn" type="button">Назад</button>
+            <div id="game-title" class="game-title">Игра</div>
+            <button id="btn-send-result" class="chip-btn" type="button">Отправить результат</button>
           </div>
-
-          <div id="ms-grid" class="ms-grid" role="grid" aria-label="Minesweeper grid"></div>
-          <p class="calc-hint">
-            Tip: Tap a cell to open. Turn on 🚩 mode to place flags.
-          </p>
+          <div id="game-root" class="game-root"></div>
         </section>
       </main>
     </div>
 
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
   </body>
   </html>
 

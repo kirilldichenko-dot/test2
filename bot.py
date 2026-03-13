@@ -10,6 +10,7 @@ import random
 import string
 import ast
 import operator
+import json
 from datetime import datetime
 
 from telegram import (
@@ -32,7 +33,8 @@ from telegram.ext import (
 from data.storage import ensure_data_files_exist
 from menu.keys import main_menu_keyboard
 from menu.router import handle_callback
-from games.chess.handlers import handle_chess_text
+from leaderboard.service import refresh_and_persist_leaderboard
+from profile.service import record_game_result, get_or_create_profile
 
 # ---------------------------------------------------------------------------
 # Logging setup
@@ -82,9 +84,67 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def game_text_router(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Route plain text messages to games if any, else fall back."""
-    if await handle_chess_text(update, context):
-        return
     await unknown_message(update, context)
+
+
+async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Receives game results from the Telegram Web App.
+
+    Web App should call:
+      Telegram.WebApp.sendData(JSON.stringify({...}))
+    """
+    msg = update.effective_message
+    if not msg or not msg.web_app_data:
+        return
+
+    raw = msg.web_app_data.data
+    user = update.effective_user
+    get_or_create_profile(
+        user.id,
+        username=user.username or "",
+        first_name=user.first_name or "",
+        last_name=user.last_name or "",
+    )
+
+    try:
+        payload = json.loads(raw)
+    except Exception:
+        await msg.reply_text("⚠️ Не удалось прочитать данные из Web App.")
+        return
+
+    event_type = payload.get("type")
+    if event_type != "result":
+        await msg.reply_text("⚠️ Неизвестный тип события из Web App.")
+        return
+
+    game = str(payload.get("game") or "unknown")
+    outcome = str(payload.get("outcome") or "unknown")  # win|loss|draw
+    score_delta = int(payload.get("score_delta") or 0)
+
+    if outcome == "win":
+        won = True
+    elif outcome == "loss":
+        won = False
+    else:
+        won = None
+
+    record_game_result(
+        user.id,
+        score_delta=score_delta,
+        won=won,
+        username=user.username or "",
+        first_name=user.first_name or "",
+        last_name=user.last_name or "",
+    )
+    refresh_and_persist_leaderboard()
+
+    await msg.reply_text(
+        "✅ Результат принят.\n\n"
+        f"Игра: {game}\n"
+        f"Исход: {outcome}\n"
+        f"Очки: +{score_delta}"
+    )
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -312,6 +372,9 @@ def main() -> None:
 
     # Menu + games navigation (inline keyboard)
     app.add_handler(CallbackQueryHandler(handle_callback))
+
+    # Web App results
+    app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, web_app_data_handler))
 
     # Location handler (for /whereami button or manual location sharing)
     app.add_handler(MessageHandler(filters.LOCATION, handle_location))

@@ -1,265 +1,142 @@
-// Telegram Web App bootstrap
-const tg = window.Telegram?.WebApp;
+import { createChessGame } from "./games/chess.js";
+import { createCheckersGame } from "./games/checkers.js";
+import { createDurakGame } from "./games/durak.js";
 
+const tg = window.Telegram?.WebApp;
 if (tg) {
   tg.ready();
-  // Expand to full height for better UX
   tg.expand();
-
-  // Keep our custom theme (we handle styling in CSS)
 }
 
-const resultBox = document.getElementById("result");
-const btnPassword = document.getElementById("btn-password");
-const btnNewGame = document.getElementById("btn-new-game");
-const btnFlagMode = document.getElementById("btn-flag-mode");
-const msGrid = document.getElementById("ms-grid");
-const msStatus = document.getElementById("ms-status");
-const msMines = document.getElementById("ms-mines");
+const btnClose = document.getElementById("btn-close");
+const btnBack = document.getElementById("btn-back");
+const btnSendResult = document.getElementById("btn-send-result");
+const gameScreen = document.getElementById("game-screen");
+const gameRoot = document.getElementById("game-root");
+const gameTitle = document.getElementById("game-title");
 
-function setResult(text) {
-  resultBox.textContent = text;
+const profileBox = document.getElementById("profile-box");
+const ratingBox = document.getElementById("rating-box");
+const musicToggle = document.getElementById("music-toggle");
+const btnSaveSettings = document.getElementById("btn-save-settings");
+
+let activeGame = null;
+let pendingResult = null;
+
+function setTab(tab) {
+  document.querySelectorAll(".tab-btn").forEach((b) => {
+    b.classList.toggle("is-active", b.dataset.tab === tab);
+  });
+  document.querySelectorAll(".tab-panel").forEach((p) => {
+    p.classList.toggle("is-active", p.id === `tab-${tab}`);
+  });
 }
 
-// Password generator (12 chars, like in the bot)
-function generatePassword() {
-  const alphabet =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_-+=[]{};:,.<>/?";
-  const length = 12;
-  let pwd = "";
-  const array = new Uint32Array(length);
-  window.crypto.getRandomValues(array);
-  for (let i = 0; i < length; i++) {
-    const idx = array[i] % alphabet.length;
-    pwd += alphabet[idx];
-  }
-  return pwd;
-}
+function openGame(id) {
+  pendingResult = null;
+  gameScreen.classList.add("is-active");
+  document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("is-active"));
+  gameTitle.textContent =
+    id === "chess"
+      ? "♟ Шахматы"
+      : id === "checkers"
+      ? "⭕ Шашки"
+      : id === "dice"
+      ? "🎲 Дуэль кубиков"
+      : "Игра";
 
-btnPassword.addEventListener("click", () => {
-  const pwd = generatePassword();
-  setResult(`🔐 Generated password:\n${pwd}`);
-});
-
-// ---------------------------------------------------------------------------
-// Minesweeper
-// ---------------------------------------------------------------------------
-
-const MS_ROWS = 9;
-const MS_COLS = 9;
-const MS_MINES = 10;
-
-let ms = null;
-let flagMode = false;
-
-function createMsState() {
-  const cells = Array.from({ length: MS_ROWS * MS_COLS }, () => ({
-    mine: false,
-    open: false,
-    flag: false,
-    adj: 0,
-  }));
-
-  // Place mines
-  const picks = new Set();
-  while (picks.size < MS_MINES) {
-    picks.add(Math.floor(Math.random() * cells.length));
-  }
-  for (const idx of picks) cells[idx].mine = true;
-
-  // Compute adjacency
-  for (let r = 0; r < MS_ROWS; r++) {
-    for (let c = 0; c < MS_COLS; c++) {
-      const i = r * MS_COLS + c;
-      if (cells[i].mine) continue;
-      let count = 0;
-      for (let dr = -1; dr <= 1; dr++) {
-        for (let dc = -1; dc <= 1; dc++) {
-          if (dr === 0 && dc === 0) continue;
-          const rr = r + dr;
-          const cc = c + dc;
-          if (rr < 0 || rr >= MS_ROWS || cc < 0 || cc >= MS_COLS) continue;
-          if (cells[rr * MS_COLS + cc].mine) count++;
-        }
-      }
-      cells[i].adj = count;
-    }
-  }
-
-  return {
-    cells,
-    over: false,
-    won: false,
-    opened: 0,
+  const onResult = (res) => {
+    pendingResult = res;
   };
+
+  if (id === "chess") activeGame = createChessGame({ root: gameRoot, onResult });
+  else if (id === "checkers") activeGame = createCheckersGame({ root: gameRoot, onResult });
+  else if (id === "durak") activeGame = createDurakGame({ root: gameRoot, onResult });
+  else if (id === "dice") {
+    gameRoot.innerHTML =
+      "<div class='game-info'>🎲 Нажмите «Бросить» ниже, чтобы сыграть против бота.</div>";
+    const btn = document.createElement("button");
+    btn.className = "primary-btn";
+    btn.type = "button";
+    btn.textContent = "🎲 Бросить";
+    btn.addEventListener("click", () => {
+      const user = 1 + Math.floor(Math.random() * 6);
+      const bot = 1 + Math.floor(Math.random() * 6);
+      let outcome = "draw";
+      if (user > bot) outcome = "win";
+      else if (user < bot) outcome = "loss";
+      const score_delta = outcome === "win" ? 3 : outcome === "draw" ? 1 : 0;
+      gameRoot.innerHTML =
+        `<div class='game-info'>Вы: ${user} | Бот: ${bot}\n` +
+        `Исход: ${outcome}\nОчки: +${score_delta}</div>`;
+      pendingResult = { type: "result", game: "dice", outcome, score_delta };
+    });
+    gameRoot.appendChild(btn);
+    activeGame = { reset() {} };
+  }
 }
 
-function msIndexFromEl(el) {
-  const idx = Number(el?.dataset?.idx);
-  return Number.isFinite(idx) ? idx : -1;
+function closeGame() {
+  gameScreen.classList.remove("is-active");
+  setTab("games");
+  if (activeGame && activeGame.reset) activeGame.reset();
+  activeGame = null;
+  pendingResult = null;
 }
 
-function msRemainingMines() {
-  const flags = ms.cells.reduce((acc, x) => acc + (x.flag ? 1 : 0), 0);
-  return Math.max(0, MS_MINES - flags);
-}
-
-function setMsStatus(text) {
-  msStatus.textContent = text;
-  msMines.textContent = `💣 ${msRemainingMines()}`;
-}
-
-function openCell(idx) {
-  if (ms.over) return;
-  const cell = ms.cells[idx];
-  if (!cell || cell.open || cell.flag) return;
-
-  cell.open = true;
-  ms.opened += 1;
-
-  if (cell.mine) {
-    ms.over = true;
-    ms.won = false;
-    revealAllMines();
-    setMsStatus("Boom! 💥");
+function sendResult() {
+  if (!tg) return;
+  if (!pendingResult) {
+    tg.showAlert("Сначала доиграйте раунд/партию, чтобы появился результат.");
     return;
   }
-
-  if (cell.adj === 0) {
-    floodOpen(idx);
-  }
-
-  checkWin();
+  tg.sendData(JSON.stringify(pendingResult));
+  tg.showAlert("Результат отправлен боту.");
 }
 
-function floodOpen(startIdx) {
-  const q = [startIdx];
-  const seen = new Set([startIdx]);
-  while (q.length) {
-    const idx = q.shift();
-    const r = Math.floor(idx / MS_COLS);
-    const c = idx % MS_COLS;
-    for (let dr = -1; dr <= 1; dr++) {
-      for (let dc = -1; dc <= 1; dc++) {
-        const rr = r + dr;
-        const cc = c + dc;
-        if (rr < 0 || rr >= MS_ROWS || cc < 0 || cc >= MS_COLS) continue;
-        const ni = rr * MS_COLS + cc;
-        if (seen.has(ni)) continue;
-        const ncell = ms.cells[ni];
-        if (ncell.open || ncell.flag) continue;
-        if (ncell.mine) continue;
-        ncell.open = true;
-        ms.opened += 1;
-        seen.add(ni);
-        if (ncell.adj === 0) q.push(ni);
-      }
-    }
-  }
-}
-
-function toggleFlag(idx) {
-  if (ms.over) return;
-  const cell = ms.cells[idx];
-  if (!cell || cell.open) return;
-  cell.flag = !cell.flag;
-  checkWin();
-}
-
-function revealAllMines() {
-  for (const c of ms.cells) {
-    if (c.mine) c.open = true;
-  }
-}
-
-function checkWin() {
-  const totalSafe = MS_ROWS * MS_COLS - MS_MINES;
-  const openedSafe = ms.cells.reduce(
-    (acc, c) => acc + (!c.mine && c.open ? 1 : 0),
-    0
-  );
-  if (openedSafe === totalSafe) {
-    ms.over = true;
-    ms.won = true;
-    setMsStatus("You win! ✅");
-  } else if (!ms.over) {
-    setMsStatus(flagMode ? "Flag mode: ON 🚩" : "Tap to open");
-  }
-}
-
-function renderGrid() {
-  msGrid.style.setProperty("--ms-cols", String(MS_COLS));
-  msGrid.innerHTML = "";
-
-  for (let i = 0; i < ms.cells.length; i++) {
-    const cell = ms.cells[i];
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "ms-cell";
-    btn.dataset.idx = String(i);
-
-    if (cell.open) {
-      btn.classList.add("is-open");
-      if (cell.mine) {
-        btn.classList.add("is-mine");
-        btn.textContent = "💣";
-      } else if (cell.adj > 0) {
-        btn.textContent = String(cell.adj);
-        btn.dataset.adj = String(cell.adj);
-      } else {
-        btn.textContent = "";
-      }
-    } else if (cell.flag) {
-      btn.classList.add("is-flag");
-      btn.textContent = "🚩";
-    } else {
-      btn.textContent = "";
-    }
-
-    btn.addEventListener("click", () => {
-      const idx = msIndexFromEl(btn);
-      if (idx < 0) return;
-      if (flagMode) toggleFlag(idx);
-      else openCell(idx);
-      renderGrid();
-    });
-
-    // Right-click for flags (desktop)
-    btn.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      const idx = msIndexFromEl(btn);
-      if (idx < 0) return;
-      toggleFlag(idx);
-      renderGrid();
-    });
-
-    msGrid.appendChild(btn);
-  }
-}
-
-function newGame() {
-  ms = createMsState();
-  setMsStatus("Tap to open");
-  renderGrid();
-}
-
-function setFlagMode(next) {
-  flagMode = Boolean(next);
-  btnFlagMode.setAttribute("aria-pressed", flagMode ? "true" : "false");
-  btnFlagMode.textContent = flagMode ? "🚩 On" : "🚩 Off";
-  checkWin();
-}
-
-btnNewGame.addEventListener("click", () => {
-  setFlagMode(false);
-  newGame();
+document.querySelectorAll(".tab-btn").forEach((b) => {
+  b.addEventListener("click", () => {
+    closeGame();
+    setTab(b.dataset.tab);
+  });
 });
 
-btnFlagMode.addEventListener("click", () => {
-  setFlagMode(!flagMode);
+document.querySelectorAll("[data-open-game]").forEach((b) => {
+  b.addEventListener("click", () => openGame(b.dataset.openGame));
 });
 
-newGame();
+btnBack.addEventListener("click", closeGame);
+btnSendResult.addEventListener("click", sendResult);
+btnClose.addEventListener("click", () => (tg ? tg.close() : window.close()));
+
+function loadBasics() {
+  const u = tg?.initDataUnsafe?.user;
+  if (u) {
+    const username = u.username ? `@${u.username}` : "—";
+    profileBox.textContent =
+      `ID: ${u.id}\n` +
+      `Имя: ${u.first_name || "—"} ${u.last_name || ""}`.trim() +
+      `\nUsername: ${username}\n\n` +
+      "Очки и рейтинг обновляются после отправки результата боту.";
+  } else {
+    profileBox.textContent = "Откройте Web App из Telegram, чтобы увидеть профиль.";
+  }
+  ratingBox.textContent = "Рейтинг отображается в боте (🏆 Рейтинг).";
+}
+
+btnSaveSettings.addEventListener("click", () => {
+  const s = { music_on: Boolean(musicToggle.checked) };
+  localStorage.setItem("hub_settings", JSON.stringify(s));
+  if (tg) tg.showAlert("Настройки сохранены.");
+});
+
+try {
+  const s = JSON.parse(localStorage.getItem("hub_settings") || "{}");
+  musicToggle.checked = Boolean(s.music_on);
+} catch {}
+
+setTab("games");
+loadBasics();
 
 // ---------------------------------------------------------------------------
 // NOTES FOR DEPLOYMENT (Vercel / BotFather)

@@ -1,3 +1,10 @@
 {
-  "settings": {}
+  "settings": {
+    "421454371": {
+      "difficulty": "normal",
+      "language": "en",
+      "music_on": true,
+      "theme": "dark"
+    }
+  }
 }

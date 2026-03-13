@@ -1,10 +1,15 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 
 
 def main_menu_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("🎮 Играть", callback_data="main:games")],
+            [
+                InlineKeyboardButton(
+                    "🎮 Играть",
+                    web_app=WebAppInfo(url="https://test2-puce-chi.vercel.app/"),
+                )
+            ],
             [InlineKeyboardButton("👤 Профиль", callback_data="main:profile")],
             [InlineKeyboardButton("🏆 Рейтинг", callback_data="main:leaderboard")],
             [InlineKeyboardButton("⚙ Настройки", callback_data="main:settings")],
@@ -13,14 +18,8 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
 
 
 def games_list_keyboard() -> InlineKeyboardMarkup:
-    games = [
-        ("♟ Шахматы", "chess"),
-        ("⭕ Шашки", "checkers"),
-        ("🎲 Дуэль кубиков", "dice"),
-    ]
-    rows = [[InlineKeyboardButton(title, callback_data=f"games:open:{gid}")] for title, gid in games]
-    rows.append([InlineKeyboardButton("🔙 Назад", callback_data="nav:back:main")])
-    return InlineKeyboardMarkup(rows)
+    # Gameplay is moved to the Telegram Web App. Keep this for future (optional).
+    return InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data="nav:back:main")]])
 
 
 def game_modes_keyboard(game_id: str) -> InlineKeyboardMarkup:
